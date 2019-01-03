@@ -10,6 +10,8 @@ void function () {
  
  if ((typeof module === "object") && module.exports) module.exports = h
  
+ if (window) window.helperjs = h
+ 
  // Settings.
  h.library_settings = {
   misc_polyfills        : true,
