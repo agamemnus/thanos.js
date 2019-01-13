@@ -1285,7 +1285,7 @@ void function () {
     if (timeout.paused) return
     timeout.paused = true
     timeout.timeLeft = new Date().getTime() - timeout.start
-    if (timeout.timeLeft <= 0) return
+    if (timeout.timeLeft < 0) return
     window.clearTimeout(timeout.id)
    },
    resume   : function () {
@@ -1325,7 +1325,7 @@ void function () {
      if (interval.paused) return
      interval.paused = true
      interval.timeLeft = new Date().getTime() - interval.start
-     if (interval.timeLeft <= 0) return
+     if (interval.timeLeft < 0) return
      if (interval.partial) {window.clearTimeout(interval.id)} else {window.clearInterval(interval.id)}
     },
     resume   : function () {
