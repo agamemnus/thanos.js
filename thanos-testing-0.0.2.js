@@ -1626,34 +1626,6 @@ void function () {
    if (typeof init.min_size != "undefined") {if (best < init.min_size) best = init.min_size}
    element.style.fontSize = best + unit_type
   }
-  
-  // Another fit_text function. This one allows multiple child elements to be fitted.
-  h.fit_text_horizontally = function (init) {
-   var parent           = init.parent
-   var children         = init.children
-   var scale_ratio_max  = init.scale_ratio_max
-   var scale_ratio_step = init.scale_ratio_step
-   var adjust_elements  = init.adjust_elements
-   if (!Array.isArray(children))        children = [children]
-   if (!Array.isArray(adjust_elements)) adjust_elements = [adjust_elements]
-   
-   var adjust_elements_font_size = []
-   adjust_elements.forEach(function (adjust_element, i) {
-    adjust_elements_font_size[i] = parseFloat(window.getComputedStyle(adjust_element).getPropertyValue("font-size"))
-   })
-   
-   while (true) {
-    parent.style.width = "auto"
-    var scale_ratio = parent.clientWidth
-    parent.style.width = ""
-    scale_ratio /= parent.clientWidth
-    if (scale_ratio <= scale_ratio_max) break
-    adjust_elements.forEach(function (adjust_element, i) {
-     adjust_elements_font_size[i] *= scale_ratio_step
-     adjust_element.style.fontSize = adjust_elements_font_size[i] + "px"
-    })
-   }
-  }
  }
  // </Font loading/handling functions.>
 } ()
