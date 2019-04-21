@@ -211,9 +211,9 @@ void function () {
     if (!isNaN(borderWidthTest)) curleft += borderWidthTest
     borderWidthTest = parseFloat(window.getComputedStyle(obj).borderTopWidth)
     if (!isNaN(borderWidthTest)) curtop += borderWidthTest
-    if (obj.offsetParent == lastobj) return [curleft, curtop] // If offsetParent is lastobj (or null if lastobj is null), return the result.
     curleft += obj.offsetLeft
     curtop  += obj.offsetTop
+    if (obj.offsetParent == lastobj) return [curleft, curtop] // If offsetParent is lastobj (or null if lastobj is null), return the result.
     obj = obj.offsetParent
    } while (true)
   }
@@ -224,8 +224,8 @@ void function () {
    do {
     borderWidthTest = parseFloat(window.getComputedStyle(obj).borderLeftWidth)
     if (!isNaN(borderWidthTest)) curleft += borderWidthTest
-    if (obj.offsetParent == lastobj) return curleft // If offsetParent is lastobj (or null if lastobj is null), return the result.
     curleft += obj.offsetLeft
+    if (obj.offsetParent == lastobj) return curleft // If offsetParent is lastobj (or null if lastobj is null), return the result.
     obj = obj.offsetParent
    } while (true)
   }
@@ -236,8 +236,8 @@ void function () {
    do {
     borderWidthTest = parseFloat(window.getComputedStyle(obj).borderTopWidth)
     if (!isNaN(borderWidthTest)) curtop += borderWidthTest
-    if (obj.offsetParent == lastobj) return curtop // If offsetParent is lastobj (or null if lastobj is null), return the result.
     curtop += obj.offsetTop
+    if (obj.offsetParent == lastobj) return curtop // If offsetParent is lastobj (or null if lastobj is null), return the result.
     obj = obj.offsetParent
    } while (true)
   }
@@ -256,9 +256,9 @@ void function () {
     if (!isNaN(borderWidthTest)) curleft += borderWidthTest * zoomLevelX
     borderWidthTest = parseFloat(window.getComputedStyle(obj).borderTopWidth)
     if (!isNaN(borderWidthTest)) curtop += borderWidthTest * zoomLevelY
-    if (obj.offsetParent == lastobj) return [curleft, curtop] // If offsetParent is lastobj (or null if lastobj is null), return the result.
     curleft += obj.offsetLeft * zoomLevelX
     curtop  += obj.offsetTop  * zoomLevelY
+    if (obj.offsetParent == lastobj) return [curleft, curtop] // If offsetParent is lastobj (or null if lastobj is null), return the result.
     obj = obj.offsetParent
    } while (true)
   }
@@ -274,8 +274,8 @@ void function () {
     }
     borderWidthTest = parseFloat(window.getComputedStyle(obj).borderLeftWidth)
     if (!isNaN(borderWidthTest)) curleft += borderWidthTest * zoomLevelX
-    if (obj.offsetParent == lastobj) return curleft // If offsetParent is lastobj (or null if lastobj is null), return the result.
     curleft += obj.offsetLeft * zoomLevelX
+    if (obj.offsetParent == lastobj) return curleft // If offsetParent is lastobj (or null if lastobj is null), return the result.
     obj = obj.offsetParent
    } while (true)
   }
@@ -291,8 +291,8 @@ void function () {
     }
     borderWidthTest = parseFloat(window.getComputedStyle(obj).borderTopWidth)
     if (!isNaN(borderWidthTest)) curtop += borderWidthTest * zoomLevelY
-    if (obj.offsetParent == lastobj) return curtop // If offsetParent is lastobj (or null if lastobj is null), return the result.
     curtop += obj.offsetTop * zoomLevelY
+    if (obj.offsetParent == lastobj) return curtop // If offsetParent is lastobj (or null if lastobj is null), return the result.
     obj = obj.offsetParent
    } while (true)
   }
@@ -486,14 +486,20 @@ void function () {
     }
     http_request.open(request_method, url, is_asynchronous)
     if (typeof response_type != "undefined") http_request.responseType = response_type
-    if (send_data_as_plaintext === true) {
-     http_request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded' + charset)
-     if (typeof http_request.overrideMimeType != "undefined") http_request.overrideMimeType("text/plain; charset=x-user-defined")
-    } else {
-     http_request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded' + charset)
+    var content_type_is_set = header_list && header_list.some(function (header) {return header.name == 'Content-type'})
+    if (!content_type_is_set) {
+     if (send_data_as_plaintext === true) {
+      http_request.setRequestHeader('Content-type', 'text/plain' + charset)
+     } else {
+      http_request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded' + charset)
+     }
     }
+    if (send_data_as_plaintext === true && typeof http_request.overrideMimeType != "undefined") http_request.overrideMimeType('text/plain; charset=x-user-defined')
     if (header_list) {
-     header_list.forEach(function (header) {http_request.setRequestHeader(header.name, header.content)})
+     header_list.forEach(function (header) {
+      http_request.setRequestHeader(header.name, header.content)
+      if (header.name == 'Content-type') http_request.overrideMimeType(header.content)
+     })
     }
     http_request.send(data)
     return {"http_request": http_request}
@@ -642,10 +648,10 @@ void function () {
     window.addEventListener   ('touchleave' , mouseupOrBlur)
    }
    if (main.textbox) {
-    document.removeEventListener      ((!useTouchEvents) ? 'mousedown' : 'touchstart', textboxBlur)
-    textboxNumber.removeEventListener ((!useTouchEvents) ? 'click'     : 'touchend',  textboxFocus)
-    textboxNumber.removeEventListener ('input'   , textboxChange)
-    textboxNumber.removeEventListener ('keypress', textboxKeypress)
+    document.addEventListener      ((!useTouchEvents) ? 'mousedown' : 'touchstart', textboxBlur)
+    textboxNumber.addEventListener ((!useTouchEvents) ? 'click'     : 'touchend',  textboxFocus)
+    textboxNumber.addEventListener ('input'   , textboxChange)
+    textboxNumber.addEventListener ('keypress', textboxKeypress)
    }
    
    main.updatePosition = function (pxc, zoomLevel) {
@@ -653,8 +659,12 @@ void function () {
     if (typeof zoomLevel == "undefined") zoomLevel = calculateZoomLevel()
     startxy = findabsposZoom(main) / (pxc * zoomLevel)
    }
-   main.setPosition = function (newPosition, triggerUpdateEvent, pxc, evt) {return setPosition(newPosition, triggerUpdateEvent, pxc, evt)}
+   main.setPosition = function (newPosition, triggerUpdateEvent, pxc, evt) {
+    triggerUpdateEvent = triggerUpdateEvent === undefined ? true : triggerUpdateEvent
+    return setPosition(newPosition, triggerUpdateEvent, pxc, evt)
+   }
    main.setPositionPercent = function (newPointValue, triggerUpdateEvent, evt) {
+    triggerUpdateEvent = triggerUpdateEvent === undefined ? true : triggerUpdateEvent
     main.setPosition(main.positionPhysicalMax * newPointValue / main.pointUpperLimit, triggerUpdateEvent, pxToCssUnitType(), evt)
    }
    main.getPositionPercent = function () {return (main.position / main.positionPhysicalMax * main.pointUpperLimit)}
@@ -808,6 +818,7 @@ void function () {
      main.pivotSlice.style[leftTop]     = ((main.pivotEnd > main.pivotStart) ? main.pivotStart : main.pivotEnd) + main.cssUnitType
     }
     if (main.textbox) textboxUpdateValue(pxc)
+    if (main.events.update) main.events.update(main)
    }
    function setPosition (newPosition, triggerUpdateEvent, pxc, evt) {
     main.position = newPosition
@@ -1301,7 +1312,7 @@ void function () {
     timeout.start = new Date().getTime()
     timeout.id = window.setTimeout.apply(window, args)
    },
-   id       : setTimeout.apply(window, args)
+   id       : window.setTimeout.apply(window, args)
   }
   return timeout
  }
@@ -1324,7 +1335,8 @@ void function () {
     pause    : function () {
      if (interval.paused) return
      interval.paused = true
-     interval.timeLeft = new Date().getTime() - interval.start
+     var date = new Date().getTime()
+     interval.timeLeft = date - interval.start
      if (interval.timeLeft < 0) return
      if (interval.partial) {window.clearTimeout(interval.id)} else {window.clearInterval(interval.id)}
     },
@@ -1341,7 +1353,7 @@ void function () {
      interval.start = new Date().getTime()
      interval.id = window.setInterval.apply(window, args)
     },
-    id       : setInterval.apply(window, args)
+    id       : window.setInterval.apply(window, args)
    }
    return interval
   }
@@ -1479,7 +1491,7 @@ void function () {
    obj.is_android         = /android/i.test(ua)
    obj.is_chromium        = /chrome/i.test(ua)
    obj.is_windows_phone   = /windows phone/i.test(ua)
-   obj.is_phone_or_tablet = ('ontouchstart' in window) || (obj.is_idevice || obj.is_android || obj.is_windows_phone)
+   obj.is_phone_or_tablet = ('ontouchstart' in window) // || (obj.is_idevice || obj.is_android || obj.is_windows_phone)
   }
   h.detect_scrollbar_thickness = function () {
    // Create the measurement node.
@@ -1629,3 +1641,5 @@ void function () {
  }
  // </Font loading/handling functions.>
 } ()
+
+if (typeof window == 'undefined') {exports = module.exports = {}; exports.helperjs = helperjs}
