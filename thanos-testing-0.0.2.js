@@ -627,10 +627,6 @@ void function () {
     main.appendChild(main.pivotSlice)
    }
    
-   // Calculate the physical control position max, calculate the logical control position max, and set the initial physical control position.
-   main.update = function () {update(main)}
-   main.update()
-   
    var startscroll = false, startxy = 0, offsetxy = 0     
    if (useMouseEvents) {  
     main.addEventListener     ('mousedown', mousedown)
@@ -685,6 +681,12 @@ void function () {
     })
     observer.observe(parent, {attributes: false, childList: true, subtree: false})
    }
+   
+   
+   // Calculate the physical control position max, calculate the logical control position max, and set the initial physical control position.
+   main.update = function () {update(main)}
+   main.update()
+   
    return main
    
    function pxToCssUnitType () {
