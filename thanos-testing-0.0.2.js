@@ -998,7 +998,14 @@ void function () {
    observer.observe(document, {childList: true, subtree: true})
    return observer
   }
-  dom.insertBefore = function (element, sibling) {element.parentNode.insertBefore(element, sibling); return element}
+  dom.insertBefore = function (element, sibling) {
+   if (!element.parentNode) {
+    sibling.parentNode.insertBefore(element, sibling)
+   } else {
+    element.parentNode.insertBefore(element, sibling)
+   }
+   return element
+  }
   dom.create = function (type, init) {
    // Note that an event in the event list with a ',' (e.g.: 'input, change') is split up into multiple events.
    var init = init || {}
